@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Site officiel de developpement du Pipotager, le potager d'appartement autonome">
+    <meta name="author" content="Victor Le Deuff">
+
+    <title>Pipotager</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/sb-admin.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+<script language="JavaScript">
+    allText =[];
+    allTextLines = [];
+     Lines = [];
+     datas = new XMLHttpRequest();
+     moistures = new XMLHttpRequest();
+      datas.open("GET", "datas.csv", true);
+    allText = datas.responseText;
+    datas.onreadystatechange = function()
+   {
+        if (datas.readyState == 4)
+        {
+            // Makes sure it's found the file.
+            allText = datas.responseText;
+            allTextLines = allText.split(/\r\n|\n/);
+	  Lines = allTextLines[allTextLines.length-2].split(',');
+	   lum = document.getElementById("Lumiere");
+	  if ( Lines[1] == "0")   {  lum="Off"} else  { 	lum= "On"}
+	   	  document.getElementById('lum').innerHTML=lum;
+    	  document.getElementById('temperature').innerHTML=Lines[2];
+	  document.getElementById('pression').innerHTML=Lines[3];
+        } 
+     }
+      
+       moistures.open("GET", "moistures.csv", true);
+       allText = datas.responseText;
+      moistures.onreadystatechange = function()
+      {
+        if (moistures.readyState == 4)
+        {
+            // Makes sure it's found the file.
+            allText = moistures.responseText;
+            allTextLines = allText.split(/\r\n|\n/);
+	  Lines = allTextLines[allTextLines.length-2].split(',');
+	  document.getElementById('humair').innerHTML=Lines[1];
+	  document.getElementById('hum1').innerHTML=Lines[2];
+	  document.getElementById('hum2').innerHTML=Lines[3];
+	  document.getElementById('hum3').innerHTML=Lines[4];
+	  document.getElementById('hum4').innerHTML=Lines[5];
+        } else { //alert("Didn't work"); 
+        }
+   }
+    datas.send(null)
+    moistures.send(null)
+     				
+			   var text =[];
+				var texteEnLigne = [];
+				 var conf = new XMLHttpRequest();
+				conf.onreadystatechange = function()
+			   {
+					if (conf.readyState == 4)
+					{
+						// Makes sure it's found the file.
+						text = conf.responseText;
+						texteEnLigne = text.split(/\r\n|\n/);
+						arrosage=true;
+						reservoirVide=true;
+						var i=0;
+						while(i<texteEnLigne.length)
+						{
+								i=i+1;
+								 id=texteEnLigne[i].split(' = ');
+								if (id[0] == "arrosage_auto" && id[1] == "Off")
+								{ arrosage = false }		
+								 else if(id[0] == "reservoir" && id[1] == "0")
+								 { 		 
+									document.getElementById("reservoir-alert").className= "show row";
+								 }
+								else if (id[0] == "reservoir" && id[1] == "1")
+								 {
+									reservoirVide=false;
+								 }
+								if ( reservoirVide == false &&  arrosage == false)
+									document.getElementById("arrosage-alert").className= "show row";
+						}
+					  } 
+					}
+				   conf.open("GET", "config.cfg", true);
+					conf.send(null)
+
+function activer_arrosage() {
+	window.open("admin/storedata.php?id=arrosage_auto&value=On", "_self")
+
+
+}
+</script>
+
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">Pipotager 1.1</a>
+            </div>
+            
+            <!-- Top Menu Items -->
+            <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+				
+		<ul class=" nav navbar-right top-nav">
+							<p class="text-muted">
+						<i class="fa fa-fw fa-quote-left"></i>
+						Une agriculture qui ne peut produire sans détruire porte en elle les germes de sa propre destruction      
+						<i class="fa fa-fw fa-quote-right"></i>
+						</p><p class="text-muted pull-right"> - Pierre Rabhi       </p>
+            </ul>
+				
+                <ul class="nav navbar-nav side-nav">
+                    <li class="active">
+                        <a href="index.html"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+                    </li>
+                    <li >
+                        <a href="charts.html"><i class="fa fa-fw fa-bar-chart-o"></i> Graphiques</a>
+                    </li>
+                  <li>
+                        <a href="configuration.html"><i class="fa fa-fw fa-wrench"></i> Configuration</a>
+                    </li>
+                    <li>
+                        <a href="presentation.html"><i class="fa fa-fw fa-desktop"></i> Présentation</a>
+                    </li>
+                    <li>
+                        <a href="photos.html"><i class="fa fa-fw fa-desktop"></i> Photos</a>
+                    </li>                    
+                    <li>
+                        <a href="apropos.html"><i class="fa fa-long-arrow-right fa-child"></i> À propos de moi</a>
+                    </li>
+                    <li>
+                        <a href="biographie.html"><i class="fa fa-fw fa-edit"></i> Biographie, Sitographie</a>
+                    </li>
+                   </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </nav>
+
+
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">
+                            Dashboard <small>Vue d'ensemble</small>
+                        </h1>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+                             
+               <div class=" show row hidden" id ="reservoir-alert">
+                    <div class="col-lg-12">
+                        <div class="alert alert-danger alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <i class="fa fa-info-circle"></i>  <strong>Le reservoir d'eau est vide !</strong> 
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+                
+                <div class=" show row hidden" id ="arrosage-alert">
+                    <div class="col-lg-12">
+                        <div class="alert alert-info alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <i class="fa fa-info-circle"></i>  
+				<strong>Le dispositif d'arrosage automatique est désactivé ! 	</strong>
+			  <button type="button" class="btn btn-info" Onclick="activer_arrosage()"> Activer </button>			    
+                        </div>
+                    </div>
+                </div>
+
+                
+                                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-yellow">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-lightbulb-o fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge" id="lum">Off</div>
+                                        <div>Lumière</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="charts.html">
+                                <div class="panel-footer">
+                                    <span class="pull-left">Plus de détails</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-sort-amount-desc fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge" id="pression">0</div>
+                                        <div>Pression (hPa)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="charts.html">
+                                <div class="panel-footer">
+                                    <span class="pull-left">Plus de détails</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-tint fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge" id="hum1">0</div>
+                                        <div>Humidité 1 (%)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="charts.html">
+                                <div class="panel-footer">
+                                    <span class="pull-left">Plus de détails</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-tint fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge" id="hum2">0</div>
+                                        <div>Humidité 2 (%)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="charts.html">
+                                <div class="panel-footer">
+                                    <span class="pull-left">Plus de détails</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+                
+                                                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-red">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-map-marker fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge" id="temperature">0</div>
+                                        <div>Temperature (°C)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="charts.html">
+                                <div class="panel-footer">
+                                    <span class="pull-left">Plus de détails</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-umbrella fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge" id="humair">0</div>
+                                        <div>Humidité  (%)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="charts.html">
+                                <div class="panel-footer">
+                                    <span class="pull-left">Plus de détails</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-tint fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge" id="hum3">0</div>
+                                        <div>Humidité 3 (%)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="charts.html">
+                                <div class="panel-footer">
+                                    <span class="pull-left">Plus de détails</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-tint fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge" id="hum4">0 </div>
+                                        <div>Humidité 4 (%)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="charts.html">
+                                <div class="panel-footer">
+                                    <span class="pull-left">Plus de détails</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+                
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-fw fa-desktop""></i> Dernière photo</h3>
+                            </div>
+                            <div class="panel-body">
+                               <img style="width: 100%" src="./last_image.jpg"  alt="Photo du projet" class="img-rounded" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-fw fa-desktop"></i> Photo du projet</h3>
+                            </div>
+                            <div class="panel-body">
+                               <img style="width: 100%" src="photos/000projet.JPG"  alt="Photo du projet" class="img-circle" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-long-arrow-right fa-fw""></i> Description du projet</h3>
+                            </div>
+                            <div class="panel-body">
+                               <strong>insert here </strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+
+                <!-- /.row -->
+
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+
+
+</body>
+
+</html>

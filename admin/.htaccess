@@ -1,0 +1,6 @@
+AuthName "Page d'administration"
+AuthType Basic
+AuthUserFile "/var/www/admin/.htpasswd"
+Require valid-user
+Options -Indexes
+
