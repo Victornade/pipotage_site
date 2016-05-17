@@ -29,14 +29,12 @@
 
 
 <script language="JavaScript">
-    allText =[];
-    allTextLines = [];
-     Lines = [];
-     datas = new XMLHttpRequest();
-     moistures = new XMLHttpRequest();
-      datas.open("GET", "datas.csv", true);
-    allText = datas.responseText;
-    datas.onreadystatechange = function()
+
+      datas = new XMLHttpRequest();
+      moistures = new XMLHttpRequest();
+      conf = new XMLHttpRequest();   
+
+    datas.onreadystatechange = function() //Recuperation des données de data.csv
    {
         if (datas.readyState == 4)
         {
@@ -52,9 +50,7 @@
         } 
      }
       
-       moistures.open("GET", "moistures.csv", true);
-       allText = datas.responseText;
-      moistures.onreadystatechange = function()
+      moistures.onreadystatechange = function() //Recuperation des données de Moisture.csv
       {
         if (moistures.readyState == 4)
         {
@@ -67,46 +63,52 @@
 	  document.getElementById('hum2').innerHTML=Lines[3];
 	  document.getElementById('hum3').innerHTML=Lines[4];
 	  document.getElementById('hum4').innerHTML=Lines[5];
+	  creerCarte2D(Lines.slice(2,Lines.length) ); //carte en 2D
         } else { //alert("Didn't work"); 
         }
    }
-    datas.send(null)
-    moistures.send(null)
      				
-			   var text =[];
-				var texteEnLigne = [];
-				 var conf = new XMLHttpRequest();
-				conf.onreadystatechange = function()
-			   {
-					if (conf.readyState == 4)
-					{
-						// Makes sure it's found the file.
-						text = conf.responseText;
-						texteEnLigne = text.split(/\r\n|\n/);
-						arrosage=true;
-						reservoirVide=true;
-						var i=0;
-						while(i<texteEnLigne.length)
-						{
-								i=i+1;
-								 id=texteEnLigne[i].split(' = ');
-								if (id[0] == "arrosage_auto" && id[1] == "Off")
-								{ arrosage = false }		
-								 else if(id[0] == "reservoir" && id[1] == "0")
-								 { 		 
-									document.getElementById("reservoir-alert").className= "show row";
-								 }
-								else if (id[0] == "reservoir" && id[1] == "1")
-								 {
-									reservoirVide=false;
-								 }
-								if ( reservoirVide == false &&  arrosage == false)
-									document.getElementById("arrosage-alert").className= "show row";
-						}
-					  } 
-					}
-				   conf.open("GET", "config.cfg", true);
-					conf.send(null)
+conf.onreadystatechange = function()
+  {
+	var seuil = [];
+	if (conf.readyState == 4)
+	{
+		// Makes sure it's found the file.
+		var text = conf.responseText;
+		var texteEnLigne = text.split(/\r\n|\n/);
+		arrosage=true;
+		reservoirVide=true;
+		var i=0;
+		while(i<texteEnLigne.length-1)
+		{
+			i=i+1;
+			var id=texteEnLigne[i].split(' = ');
+			if (id[0] == "arrosage_auto" && id[1] == "Off")
+			{ arrosage = false }		
+			 else if(id[0] == "reservoir" && id[1] == "0")
+			 { 		 
+				document.getElementById("reservoir-alert").className= "show row";
+			 }
+			else if (id[0] == "reservoir" && id[1] == "1")
+			 {
+				reservoirVide=false;
+			 }
+			if ( reservoirVide == false &&  arrosage == false)
+				document.getElementById("arrosage-alert").className= "show row";
+			if ( id[0].indexOf("seuil") != -1 ) //Recuperation des valeurs de seuil
+                        {       
+				seuil[ id[0][id[0].length-1]-1 ]= id[1];  
+			}
+		}
+	  document.getElementById('carte2D').innerHTML=seuil; //Enregistrement
+	  } 
+  }
+ conf.open("GET", "config.cfg",true);
+ conf.send(null)
+ datas.open("GET", "datas.csv", true);
+ datas.send(null)
+moistures.open("GET", "moistures.csv", true);
+ moistures.send(null)
 
 function activer_arrosage() {
 	window.open("admin/storedata.php?id=arrosage_auto&value=On", "_self")
@@ -422,6 +424,20 @@ function activer_arrosage() {
                     <div class="col-lg-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-fw fa-desktop""></i> Carte d'humidité</h3>
+                            </div>
+                            <canvas id="carte2D" width="600" height="200"> </canvas>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
                                 <h3 class="panel-title"><i class="fa fa-fw fa-desktop"></i> Photo du projet</h3>
                             </div>
                             <div class="panel-body">
@@ -466,7 +482,49 @@ function activer_arrosage() {
     <!-- Bootstrap Core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
 
+<script>
 
+function creerCarte2D(hum)
+{     
+      seuil= document.getElementById('carte2D').innerHTML.split(',');
+      canvas = document.getElementById('carte2D');
+      pos = [ [0, 0, 100, 200], [100, 100, 200, 100], [100, 0, 200, 100], [300, 0, 100, 200]];
+      for (var i=0; i<hum.length;++i)
+      {
+	zone=canvas.getContext('2d');
+      	zone.beginPath();     
+        zone.rect(pos[i][0], pos[i][1], pos[i][2], pos[i][3]);		     
+        if(hum[i] <= seuil[i]-3)
+                  zone.fillStyle = 'red';
+          else if (hum[i] >=  seuil[i])
+                  zone.fillStyle = 'blue';
+          else
+                  zone.fillStyle = 'green';
+	zone.fill();
+        zone.lineWidth = 7;
+        zone.strokeStyle = 'black';
+        zone.stroke();
+      }
+			//Legende
+       posLegende= 450;
+       color = ['blue', 'green', 'red'];
+       Nom= ["humide", "bien", "Sec"];
+  	for (var i=0; i<3;++i)
+      {
+        zone=canvas.getContext('2d');
+        zone.beginPath();      
+        zone.rect( posLegende, 20+50*i, 50, 50);
+        zone.fillStyle = color[i];
+        zone.font = 'italic 20pt Calibri';
+        zone.fillText(Nom[i], posLegende+60, 20+45*(i+1));
+        zone.fill();
+        zone.lineWidth = 7;
+       zone.strokeStyle = 'black';
+        zone.stroke();
+      }
+      
+}
+</script>
 
 </body>
 
